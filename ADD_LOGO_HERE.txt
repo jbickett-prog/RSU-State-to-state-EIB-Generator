@@ -1,8 +1,0 @@
-Replace logo.png in this directory with your own logo.
-
-Recommended specs:
-  - Format : PNG
-  - Size   : 400 x 100 px (or similar wide/short aspect ratio)
-  - Background: transparent or #1a1a2e (dark navy)
-
-The logo is displayed in the app header.
