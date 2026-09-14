@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>jbickett-prog / eib-assistant</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; font-size: 14px; color: #1f2328; background: #ffffff; }
+
+    /* Top nav */
+    .topnav { background: #24292f; padding: 12px 16px; display: flex; align-items: center; gap: 16px; }
+    .topnav-logo { color: white; font-size: 22px; font-weight: 700; letter-spacing: -1px; text-decoration: none; }
+    .topnav-logo span { color: #f78166; }
+
+    /* Repo header */
+    .repo-header { padding: 16px 24px 0; border-bottom: 1px solid #d0d7de; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .repo-owner { font-size: 20px; color: #0969da; font-weight: 400; text-decoration: none; }
+    .repo-owner:hover { text-decoration: underline; }
+    .repo-sep { font-size: 20px; color: #57606a; margin: 0 2px; }
+    .repo-name { font-size: 20px; color: #0969da; font-weight: 600; text-decoration: none; }
+    .repo-name:hover { text-decoration: underline; }
+    .repo-badge { background: #eaeef2; border: 1px solid #d0d7de; border-radius: 20px; padding: 2px 10px; font-size: 12px; color: #57606a; font-weight: 500; }
+
+    /* Tab bar */
+    .tabs { padding: 0 24px; border-bottom: 1px solid #d0d7de; display: flex; gap: 0; margin-top: 8px; }
+    .tab { padding: 10px 16px; font-size: 14px; color: #57606a; cursor: pointer; border-bottom: 2px solid transparent; text-decoration: none; display: flex; align-items: center; gap: 6px; }
+    .tab.active { color: #1f2328; border-bottom: 2px solid #fd8c73; font-weight: 600; }
+    .tab:hover { color: #1f2328; background: #f6f8fa; border-radius: 6px 6px 0 0; }
+    .tab-icon { font-size: 15px; }
+
+    /* Layout */
+    .layout { display: flex; gap: 24px; padding: 24px; max-width: 1280px; margin: 0 auto; }
+    .main { flex: 1; min-width: 0; }
+    .sidebar { width: 296px; flex-shrink: 0; }
+
+    /* Branch bar */
+    .branch-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; gap: 10px; flex-wrap: wrap; }
+    .branch-btn { display: flex; align-items: center; gap: 6px; border: 1px solid #d0d7de; border-radius: 6px; padding: 5px 12px; background: #f6f8fa; font-size: 13px; cursor: pointer; color: #1f2328; font-weight: 500; }
+    .branch-btn:hover { background: #eaeef2; }
+    .branch-actions { display: flex; gap: 8px; }
+    .btn-outline { border: 1px solid #d0d7de; border-radius: 6px; padding: 5px 12px; background: #f6f8fa; font-size: 13px; cursor: pointer; color: #1f2328; font-weight: 500; display: flex; align-items: center; gap: 5px; }
+    .btn-outline:hover { background: #eaeef2; }
+    .btn-green { border: 1px solid #2da44e; border-radius: 6px; padding: 5px 14px; background: #2da44e; font-size: 13px; cursor: pointer; color: white; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+    .btn-green:hover { background: #2c974b; }
+    .btn-chevron { border-left: 1px solid rgba(255,255,255,0.3); padding-left: 8px; }
+
+    /* File table */
+    .file-table { border: 1px solid #d0d7de; border-radius: 6px; overflow: hidden; margin-bottom: 16px; }
+    .file-table-header { background: #f6f8fa; padding: 10px 16px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #d0d7de; font-size: 13px; color: #57606a; }
+    .commit-avatar { width: 20px; height: 20px; border-radius: 50%; background: linear-gradient(135deg, #0969da, #8250df); display: flex; align-items: center; justify-content: center; color: white; font-size: 10px; font-weight: 700; flex-shrink: 0; }
+    .commit-author { color: #1f2328; font-weight: 600; font-size: 13px; }
+    .commit-msg { color: #1f2328; font-size: 13px; }
+    .commit-meta { margin-left: auto; display: flex; align-items: center; gap: 16px; color: #57606a; font-size: 12px; }
+    .commit-hash { color: #0969da; font-family: monospace; }
+    .commit-hash:hover { text-decoration: underline; cursor: pointer; }
+
+    .file-row { display: flex; align-items: center; padding: 8px 16px; border-bottom: 1px solid #d0d7de; gap: 10px; transition: background 0.1s; }
+    .file-row:last-child { border-bottom: none; }
+    .file-row:hover { background: #f6f8fa; }
+    .file-icon { color: #57606a; font-size: 15px; flex-shrink: 0; width: 18px; }
+    .file-name { color: #0969da; font-size: 14px; text-decoration: none; flex: 1; font-weight: 400; }
+    .file-name:hover { text-decoration: underline; color: #0969da; }
+    .file-commit { color: #57606a; font-size: 13px; flex: 2; }
+    .file-date { color: #57606a; font-size: 13px; text-align: right; white-space: nowrap; }
+
+    /* README */
+    .readme-box { border: 1px solid #d0d7de; border-radius: 6px; overflow: hidden; }
+    .readme-header { background: #f6f8fa; padding: 10px 16px; border-bottom: 1px solid #d0d7de; display: flex; align-items: center; justify-content: space-between; }
+    .readme-title { font-size: 14px; font-weight: 600; color: #1f2328; display: flex; align-items: center; gap: 8px; }
+    .readme-title::before { content: "📖"; font-size: 14px; }
+    .readme-actions { display: flex; gap: 10px; color: #57606a; font-size: 16px; cursor: pointer; }
+    .readme-body { padding: 24px 32px; }
+    .readme-body h1 { font-size: 28px; font-weight: 700; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid #d0d7de; color: #1f2328; }
+    .readme-body h2 { font-size: 20px; font-weight: 700; margin: 20px 0 10px; padding-bottom: 6px; border-bottom: 1px solid #d0d7de; }
+    .readme-body h3 { font-size: 16px; font-weight: 700; margin: 16px 0 8px; }
+    .readme-body p { margin-bottom: 12px; line-height: 1.6; color: #1f2328; }
+    .readme-body ul { margin: 8px 0 12px 24px; line-height: 1.8; }
+    .readme-body li { color: #1f2328; }
+    .readme-body code { background: #f6f8fa; border: 1px solid #d0d7de; border-radius: 4px; padding: 2px 6px; font-family: monospace; font-size: 12px; color: #1f2328; }
+    .readme-body a { color: #0969da; text-decoration: none; }
+    .readme-body a:hover { text-decoration: underline; }
+    .readme-body table { border-collapse: collapse; width: 100%; margin: 12px 0; font-size: 14px; }
+    .readme-body th { background: #f6f8fa; padding: 8px 12px; border: 1px solid #d0d7de; font-weight: 600; text-align: left; }
+    .readme-body td { padding: 8px 12px; border: 1px solid #d0d7de; }
+    .readme-body td a { color: #0969da; }
+
+    /* Sidebar */
+    .about-box { margin-bottom: 20px; }
+    .about-box h3 { font-size: 16px; font-weight: 700; margin-bottom: 8px; color: #1f2328; }
+    .about-desc { color: #57606a; font-size: 14px; margin-bottom: 10px; font-style: italic; }
+    .about-meta { display: flex; flex-direction: column; gap: 6px; }
+    .about-meta-item { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #57606a; }
+    .about-meta-item a { color: #0969da; text-decoration: none; }
+    .about-meta-item a:hover { text-decoration: underline; }
+    .sidebar-section { border-top: 1px solid #d0d7de; padding-top: 16px; margin-top: 4px; margin-bottom: 16px; }
+    .sidebar-section h3 { font-size: 16px; font-weight: 700; margin-bottom: 8px; color: #1f2328; }
+    .sidebar-empty { font-size: 13px; color: #57606a; margin-bottom: 6px; }
+    .sidebar-link { color: #0969da; font-size: 13px; text-decoration: none; }
+    .sidebar-link:hover { text-decoration: underline; }
+    .contributor { display: flex; align-items: center; gap: 8px; }
+    .contrib-avatar { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #0969da, #8250df); display: flex; align-items: center; justify-content: center; color: white; font-size: 13px; font-weight: 700; }
+    .contrib-name { font-size: 13px; font-weight: 600; color: #1f2328; }
+
+    /* Download badge */
+    .dl-badge { display: inline-flex; align-items: center; gap: 5px; background: #dafbe1; border: 1px solid #2da44e; border-radius: 20px; padding: 2px 10px; font-size: 12px; color: #116329; font-weight: 600; text-decoration: none; margin-left: 8px; }
+    .dl-badge:hover { background: #c6f0cd; text-decoration: none; }
+  </style>
+</head>
+<body>
+
+<!-- Top Nav -->
+<div class="topnav">
+  <a class="topnav-logo" href="#">⬡ <span>jbickett</span>-prog</a>
+</div>
+
+<!-- Repo Header -->
+<div class="repo-header">
+  <a class="repo-owner" href="#">jbickett-prog</a>
+  <span class="repo-sep">/</span>
+  <a class="repo-name" href="#">eib-assistant</a>
+  <span class="repo-badge">Public</span>
+</div>
+
+<!-- Tabs -->
+<div class="tabs">
+  <a class="tab active" href="#"><span class="tab-icon">⌂</span> Code</a>
+  <a class="tab" href="#"><span class="tab-icon">⊙</span> Issues</a>
+  <a class="tab" href="#"><span class="tab-icon">⇄</span> Pull requests</a>
+  <a class="tab" href="#"><span class="tab-icon">▷</span> Actions</a>
+  <a class="tab" href="#"><span class="tab-icon">□</span> Projects</a>
+  <a class="tab" href="#"><span class="tab-icon">⚙</span> Settings</a>
+</div>
+
+<!-- Main Layout -->
+<div class="layout">
+  <div class="main">
+
+    <!-- Branch bar -->
+    <div class="branch-bar">
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button class="branch-btn">⎇ main ▾</button>
+        <span style="font-size:13px;color:#57606a;">⎇ <strong>1</strong> Branch</span>
+        <span style="font-size:13px;color:#57606a;">⊘ <strong>0</strong> Tags</span>
+      </div>
+      <div class="branch-actions">
+        <button class="btn-outline">🔍 Go to file &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; T</button>
+        <button class="btn-outline">＋ Add file ▾</button>
+        <button class="btn-green">&lt;&gt; Code ▾</button>
+      </div>
+    </div>
+
+    <!-- File table -->
+    <div class="file-table">
+      <div class="file-table-header">
+        <div class="commit-avatar">J</div>
+        <span class="commit-author">jbickett-prog</span>
+        <span class="commit-msg">Add EIB Assistant RSU Tax Formatter</span>
+        <div class="commit-meta">
+          <span class="commit-hash">a1b2c3d</span>
+          <span>· 4 days ago ·</span>
+          <span>⟳ 6 Commits</span>
+        </div>
+      </div>
+
+      <!-- index.html -->
+      <div class="file-row">
+        <span class="file-icon">📄</span>
+        <a class="file-name" href="index.html" download>index.html</a>
+        <span class="file-commit">Add EIB Assistant RSU Tax Formatter</span>
+        <span class="file-date">4 days ago</span>
+      </div>
+
+      <!-- style.css -->
+      <div class="file-row">
+        <span class="file-icon">📄</span>
+        <a class="file-name" href="style.css" download>style.css</a>
+        <span class="file-commit">Add EIB Assistant RSU Tax Formatter</span>
+        <span class="file-date">4 days ago</span>
+      </div>
+
+      <!-- app.js -->
+      <div class="file-row">
+        <span class="file-icon">📄</span>
+        <a class="file-name" href="app.js" download>app.js</a>
+        <span class="file-commit">Add EIB Assistant RSU Tax Formatter</span>
+        <span class="file-date">4 days ago</span>
+      </div>
+
+      <!-- Standalone -->
+      <div class="file-row">
+        <span class="file-icon">📄</span>
+        <a class="file-name" href="EIB_Assistant_Standalone.html" download>EIB_Assistant_Standalone.html</a>
+        <span class="file-commit">Standalone single-file version (open directly in browser)</span>
+        <span class="file-date">4 days ago</span>
+      </div>
+
+    </div>
+
+    <!-- README -->
+    <div class="readme-box">
+      <div class="readme-header">
+        <div class="readme-title">README</div>
+        <div class="readme-actions">✏ ☰</div>
+      </div>
+      <div class="readme-body">
+        <h1>🧾 EIB Assistant – RSU Tax Formatter</h1>
+        <p>A browser-based tool that reads your RSU output spreadsheet and automatically generates rows in the exact format required by the <strong>Payroll Off cycle Payment EIB</strong> (134-column layout).</p>
+
+        <h2>📥 Download</h2>
+        <table>
+          <tr>
+            <th>File</th>
+            <th>Description</th>
+            <th>Download</th>
+          </tr>
+          <tr>
+            <td><code>EIB_Assistant_Standalone.html</code></td>
+            <td>⭐ <strong>Recommended</strong> — single file, open directly in any browser</td>
+            <td><a href="EIB_Assistant_Standalone.html" download>⬇️ Download</a></td>
+          </tr>
+          <tr>
+            <td><code>index.html</code></td>
+            <td>Main HTML (requires app.js + style.css in same folder)</td>
+            <td><a href="index.html" download>⬇️ Download</a></td>
+          </tr>
+          <tr>
+            <td><code>style.css</code></td>
+            <td>Stylesheet</td>
+            <td><a href="style.css" download>⬇️ Download</a></td>
+          </tr>
+          <tr>
+            <td><code>app.js</code></td>
+            <td>Application logic</td>
+            <td><a href="app.js" download>⬇️ Download</a></td>
+          </tr>
+        </table>
+
+        <h2>🚀 How to Use</h2>
+        <ol style="margin-left:24px;line-height:1.9;">
+          <li>Download <code>EIB_Assistant_Standalone.html</code> and open it in Chrome or Edge</li>
+          <li><strong>Step 1</strong> — Drop your output spreadsheet (.xlsx) onto the upload area</li>
+          <li><strong>Step 2</strong> — Select an Employee ID and Transaction ID (or leave blank for all)</li>
+          <li><strong>Step 3</strong> — Confirm the EIB settings (Batch ID, dates, Run Category, etc.)</li>
+          <li><strong>Step 4</strong> — Click <em>Export to Excel</em> or <em>Copy Rows</em> and paste directly into your EIB</li>
+        </ol>
+
+        <h2>✅ Features</h2>
+        <ul>
+          <li>Exact 134-column EIB layout (Payroll Off cycle Payment v25.2)</li>
+          <li>Auto-detects Original, Deloitte, and QUESTIONS_ sheets</li>
+          <li>Maps state abbreviations → Payroll Authority Tax Codes (leading zeros preserved)</li>
+          <li>Generates TVRSU, NVRSU, W_SWW + W_CWCGW / W_TTWG / W_TXWG sub-lines per state</li>
+          <li>Skips state rows where all values are zero</li>
+          <li>Transaction ID written to Spreadsheet Key column</li>
+          <li>Bulk export — process every employee at once</li>
+          <li>Works fully offline — no server or install needed</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="about-box">
+      <h3>About</h3>
+      <p class="about-desc">RSU Tax EIB formatter — converts output spreadsheets into Workday-ready payroll rows.</p>
+      <div class="about-meta">
+        <div class="about-meta-item">📖 <a href="#">Readme</a></div>
+        <div class="about-meta-item">⚡ <a href="#">Activity</a></div>
+        <div class="about-meta-item">☆ <strong>0</strong> stars</div>
+        <div class="about-meta-item">👁 <strong>0</strong> watching</div>
+        <div class="about-meta-item">⑂ <strong>0</strong> forks</div>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <h3>Releases</h3>
+      <p class="sidebar-empty">No releases published</p>
+      <a class="sidebar-link" href="#">Create a new release</a>
+    </div>
+
+    <div class="sidebar-section">
+      <h3>Packages</h3>
+      <p class="sidebar-empty">No packages published</p>
+      <a class="sidebar-link" href="#">Publish your first package</a>
+    </div>
+
+    <div class="sidebar-section">
+      <h3>Contributors &nbsp;<span style="background:#eaeef2;border-radius:20px;padding:1px 8px;font-size:12px;font-weight:600;">1</span></h3>
+      <div class="contributor">
+        <div class="contrib-avatar">J</div>
+        <span class="contrib-name">jbickett-prog</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>
