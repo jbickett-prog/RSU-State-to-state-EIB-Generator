@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EIB Assistant – RSU Tax Formatter</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="app">
+  <header>
+    <div class="header-inner">
+      <div class="logo">🧾 EIB Assistant</div>
+      <div class="subtitle">RSU Tax Formatter</div>
+    </div>
+  </header>
+
+  <!-- STEP 1: Load Output File -->
+  <section class="card" id="step1">
+    <div class="step-badge">Step 1</div>
+    <h2>Load Output File</h2>
+    <p>Upload your output spreadsheet (the May 26 style file with the <strong>Original</strong> or <strong>Deloitte</strong> sheet).</p>
+    <div class="drop-zone" id="dropZone1">
+      <div class="drop-icon">📂</div>
+      <div class="drop-text">Drop your output file here or <label class="browse-label" for="fileInput">browse</label></div>
+      <input type="file" id="fileInput" accept=".xlsx,.xls" style="display:none">
+      <div id="fileStatus" class="file-status"></div>
+    </div>
+  </section>
+
+  <!-- STEP 2: Select Employee / Transaction -->
+  <section class="card hidden" id="step2">
+    <div class="step-badge">Step 2</div>
+    <h2>Select Employee / Transaction</h2>
+    <div class="controls-row">
+      <div class="control-group">
+        <label>Source Sheet</label>
+        <select id="sheetSelect"></select>
+      </div>
+      <div class="control-group">
+        <label>Employee ID</label>
+        <select id="empSelect"><option value="">— choose —</option></select>
+      </div>
+      <div class="control-group">
+        <label>Transaction ID</label>
+        <select id="txnSelect"><option value="">— all —</option></select>
+      </div>
+      <button class="btn-primary" id="loadBtn">Load Data</button>
+    </div>
+    <div id="inputPreview" class="table-wrap"></div>
+  </section>
+
+  <!-- STEP 3: EIB Settings -->
+  <section class="card hidden" id="step3">
+    <div class="step-badge">Step 3</div>
+    <h2>EIB Settings</h2>
+    <p>These values are stamped on every row to match your EIB template.</p>
+    <div class="controls-row">
+      <div class="control-group">
+        <label>Batch ID</label>
+        <input type="text" id="batchId" value="RSU May 26" placeholder="e.g. RSU May 26">
+      </div>
+      <div class="control-group">
+        <label>Payment Date</label>
+        <input type="text" id="paymentDate" value="2026-05-01" placeholder="YYYY-MM-DD">
+      </div>
+      <div class="control-group">
+        <label>Period Date</label>
+        <input type="text" id="periodDate" value="2026-05-01" placeholder="YYYY-MM-DD">
+      </div>
+      <div class="control-group">
+        <label>Payment Priority</label>
+        <input type="text" id="payPriority" value="3" placeholder="3">
+      </div>
+      <div class="control-group">
+        <label>Run Category</label>
+        <input type="text" id="runCategory" value="RSU_USA" placeholder="RSU_USA">
+      </div>
+      <div class="control-group">
+        <label>Result Type</label>
+        <input type="text" id="resultType" value="OnDemandPayment" placeholder="OnDemandPayment">
+      </div>
+      <div class="control-group">
+        <label>Reason</label>
+        <input type="text" id="reason" value="Stock" placeholder="Stock">
+      </div>
+    </div>
+  </section>
+
+  <!-- STEP 4: EIB Output -->
+  <section class="card hidden" id="step4">
+    <div class="step-badge">Step 4</div>
+    <h2>EIB Formatted Output</h2>
+    <div class="action-row">
+      <button class="btn-secondary" id="copyBtn">📋 Copy Rows (paste into EIB)</button>
+      <button class="btn-primary" id="exportBtn">⬇️ Export to Excel (EIB format)</button>
+      <div class="spacer"></div>
+      <div id="rowCount" class="row-count-badge"></div>
+    </div>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot dot-tvrsu"></div> TVRSU – Total Distribution</div>
+      <div class="legend-item"><div class="legend-dot dot-nvrsu"></div> NVRSU – EE Withholding</div>
+      <div class="legend-item"><div class="legend-dot dot-wsww"></div> W_SWW – State Tax</div>
+      <div class="legend-item"><div class="legend-dot dot-sub"></div> Sub-calc lines</div>
+    </div>
+    <div id="outputPreview" class="table-wrap"></div>
+    <div id="exportMsg" class="export-msg hidden">✅ Exported! The file matches EIB column layout — paste directly into your template.</div>
+  </section>
+
+  <!-- STEP 5: Bulk Process -->
+  <section class="card" id="step5">
+    <div class="step-badge">Bulk</div>
+    <h2>Bulk Process All Employees</h2>
+    <p>Generate EIB rows for <strong>every</strong> employee in the selected sheet at once.</p>
+    <div class="action-row">
+      <button class="btn-secondary hidden" id="bulkBtn" disabled>⚡ Generate All EIB Rows</button>
+    </div>
+    <div id="bulkPreview" class="table-wrap"></div>
+    <div class="action-row hidden" id="bulkExportRow">
+      <button class="btn-primary" id="bulkExportBtn">⬇️ Export All to Excel (EIB format)</button>
+    </div>
+  </section>
+
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
